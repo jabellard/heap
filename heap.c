@@ -4,11 +4,6 @@
 heap_node_t *
 heap_node_create(heap_key_t k, void *v)
 {
-	if (!v)
-	{
-		return NULL;
-	} // end if
-	
 	heap_node_t *n = malloc(sizeof(heap_node_t));
 	if (!n)
 	{
@@ -17,7 +12,7 @@ heap_node_create(heap_key_t k, void *v)
 	
 	n->k = k;
 	n->v = v;
-	
+	n->container = NULL;
 	return n;
 } // end heap_node_create()
 
@@ -45,7 +40,7 @@ heap_create(size_t capacity, data_dtor_func_t dtor)
 		return NULL;
 	} // end if
 	
-	size_t _capacity = MAX(HEAP_MIN_CAPCITY, capacity);
+	size_t _capacity = MAX(HEAP_MIN_CAPACITY, capacity);
 	
 	heap_t *h = malloc(sizeof(heap_t));
 	if (!h)
@@ -95,23 +90,24 @@ heap_insert(heap_t *h, heap_key_t k, void *v)
 		return -1;
 	} // end if
 	
-	(h->size)++;
-	
 	heap_node_t *n = heap_node_create(k, v);
 	if (!n)
 	{
 		return -1;
 	} // end if
 	
+	(h->size)++;
+	
+	n->container = h;
 	h->nodes[h->size -1] = n;
 	
 	size_t i = h->size - 1;
-	while (i > 1 && h->nodes[i / 2].k < h->nodes[i].k)
+	while (i > 0 && h->nodes[(i - 1) / 2]->k < h->nodes[i]->k)
 	{
 		heap_node_t *tmp = h->nodes[i];
-		h->nodes[i] = h->nodes[i / 2];
-		h->nodes[i / 2] = tmp;
-		i = i / 2;
+		h->nodes[i] = h->nodes[(i - 1) / 2];
+		h->nodes[(i - 1) / 2] = tmp;
+		i = (i - 1) / 2;
 	} // end while
 	
 	return 0;
@@ -129,9 +125,9 @@ _heap_get_max(heap_t *h)
 } // end _heap_get_max()
 
 void *
-heap_get_max(heap_t *h, heap_key_t **k, void **v)
+heap_get_max(heap_t *h)
 {
-	heap_t *r = _heap_get_max(h);
+	heap_node_t *r = _heap_get_max(h);
 	
 	if (r)
 	{
@@ -149,8 +145,8 @@ max_heapify(heap_t *h, size_t i)
 		return;
 	} // end if
 	
-	size_t l = 2 * i;
-	size_t r = 2 * i + 1;
+	size_t l = 2 * i + 1;
+	size_t r = 2 * i + 2; // index problem???
 	size_t largest = i;
 	
 	if (l <= h->size && h->nodes[l] > h->nodes[r])
@@ -181,11 +177,46 @@ heap_destroy_max(heap_t *h)
 		return;
 	} // end if
 	
-	heap_node_destory(h->nodes[0]);
+	heap_node_destroy(h->nodes[0]);
 	
-	h->nodes[0] = h->node[h->size - 1];
+	h->nodes[0] = h->nodes[h->size - 1];
+	h->nodes[h->size - 1] = NULL;
 	
 	(h->size)--;
 	
 	max_heapify(h, 0);
+	
+	return;
 } // end heap_destory_max()
+
+size_t
+heap_get_size(heap_t *h)
+{
+	if (!h)
+	{
+		return -1;
+	} // end if
+	
+	return h->size;
+} // end heap_get_size()
+
+size_t 
+heap_get_capacity(heap_t *h)
+{
+	if (!h)
+	{
+		return -1;
+	} // end if
+	
+	return h->capacity;
+} // end heap_get_capacity()
+
+static void 
+safe_free(void **pp)
+{
+	if (pp != NULL && *pp != NULL)
+	{
+		free(*pp);
+		*pp = NULL;
+	} // end if
+} // end safe_free()
