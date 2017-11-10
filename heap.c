@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "heap.h"
 
-heap_node_t *
+static heap_node_t *
 heap_node_create(heap_key_t k, void *v)
 {
 	heap_node_t *n = malloc(sizeof(heap_node_t));
@@ -16,7 +16,7 @@ heap_node_create(heap_key_t k, void *v)
 	return n;
 } // end heap_node_create()
 
-void
+static void
 heap_node_destroy(heap_node_t *n)
 {
 	if (!n)
@@ -137,7 +137,7 @@ heap_get_max(heap_t *h)
 	return NULL;
 } // end heap_get_max()
 
-void
+static void
 max_heapify(heap_t *h, size_t i)
 {
 	if (!h || !h->nodes)

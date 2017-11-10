@@ -24,10 +24,10 @@ typedef struct _heap_t
 	data_dtor_func_t dtor;
 }heap_t;
 
-heap_node_t *
+static heap_node_t *
 heap_node_create(heap_key_t k, void *v);
 
-void
+static void
 heap_node_destroy(heap_node_t *n);
 
 heap_t *
@@ -45,7 +45,7 @@ _heap_get_max(heap_t *h);
 void *
 heap_get_max(heap_t *h);
 
-void
+static void
 max_heapify(heap_t *h, size_t i);
 
 void
