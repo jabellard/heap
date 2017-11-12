@@ -1,6 +1,22 @@
 #include <stdlib.h>
 #include "heap.h"
 
+#define sfree(p) safe_free((void**)&(p))
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+static heap_node_t *
+heap_node_create(heap_key_t k, void *v);
+
+static void
+heap_node_destroy(heap_node_t *n);
+
+static void
+max_heapify(heap_t *h, size_t i);
+
+static void
+safe_free(void **pp);
+
 static heap_node_t *
 heap_node_create(heap_key_t k, void *v)
 {
@@ -73,7 +89,7 @@ heap_destroy(heap_t *h)
 	 if (h->nodes)
 	 {
 	 	 size_t i = 0;
-		 for (i; i < h->size; i++)
+		 for (; i < h->size; i++)
 		 {
 	 		heap_node_destroy(h->nodes[i]);
 	 	 } // end for
